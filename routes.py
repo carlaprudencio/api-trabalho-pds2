@@ -1,16 +1,18 @@
+import os
 from flask import Blueprint, request, jsonify
-from pymongo import MongoClient
+from database import Database
 
 worker_routes = Blueprint('worker_routes', __name__)
 
-client = MongoClient("mongodb://localhost:27017/")  # Conecta ao MongoDB
-db = client["workers"]  # Nome do banco de dados
-workers_collection = db["workers"]  # Nome da coleção
+# Conecta ao MongoDB
+mongo_password = os.environ.get('MONGO_PASSWORD')
+uri = f"mongodb+srv://carlavprudencio:{mongo_password}@studies.h33rdll.mongodb.net/"
+db = Database(uri)
+workers_collection = db.get_collection("workers")
 
 @worker_routes.route('/workers', methods=['POST'])
 def add_worker():
     data = request.get_json()
-    # Verifica se os campos obrigatórios estão presentes
     required_fields = ['name', 'phone', 'neighborhood', 'city', 'state', 'category']
     for field in required_fields:
         if field not in data:
